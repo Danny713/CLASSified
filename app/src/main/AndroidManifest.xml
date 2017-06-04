@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.classified.classified">
+
+    <uses-permission android:name="android.permission.INTERNET" />
+
+    <application
+        android:allowBackup="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:theme="@style/AppTheme">
+        <activity
+            android:name=".Login_page"
+            android:label="Login_page">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".HomePage"
+            android:label="@string/app_name" />
+        <activity
+            android:name=".ClassDetails"
+            android:label="@string/title_activity_class_details" />
+        <activity
+            android:name=".chat"
+            android:label="@string/title_activity_chat" />
+        <activity android:name=".CAS_login"></activity>
+    </application>
+
+</manifest>

@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">CLASSified</string>
+
+    <string name="hello_world">Hello world!</string>
+    <string name="action_settings">Settings</string>
+    <string name="title_activity_class_details">ClassDetails</string>
+    <string name="title_activity_chat">chat</string>
+    <string name="title_activity_cas__login">Cas_Login</string>
+</resources>
