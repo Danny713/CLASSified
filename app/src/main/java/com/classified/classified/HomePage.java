@@ -2,6 +2,7 @@ package com.classified.classified;
 
 import android.app.ActionBar;
 import android.app.Activity;
+import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
@@ -9,9 +10,11 @@ import android.graphics.drawable.ColorDrawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
+import android.support.v7.widget.SearchView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
@@ -63,12 +66,10 @@ public class HomePage extends ActionBarActivity {
         this.context = this;
         setTitle("CLASSified");
 
-        spinner = (Spinner)findViewById(R.id.spinner);
         search = (EditText) findViewById(R.id.searchQuery);
         openListView = (ListView) findViewById(R.id.openListView);
 
-        spinner.setAdapter(new MyAdapter(this, android.R.layout.simple_spinner_item, searchOptions));
-        addListenerOnSpinner();
+        // addListenerOnSpinner();
 
         openListView.setOnItemClickListener(onListClick);
     }
@@ -349,7 +350,13 @@ public class HomePage extends ActionBarActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_home_page, menu);
+        MenuInflater inflater =  getMenuInflater();
+        inflater.inflate(R.menu.search, menu);
+
+        SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
+        SearchView searchView = (SearchView) menu.findItem(R.id.search).getActionView();
+        searchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName())); // this is throwing an error
+
         return true;
     }
 

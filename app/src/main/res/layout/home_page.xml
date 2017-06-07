@@ -34,12 +34,6 @@
             android:orientation="horizontal"
             android:weightSum="1">
 
-            <Spinner
-                android:id="@+id/spinner"
-                android:layout_width="45dp"
-                android:layout_height="45dp"
-                android:theme="@style/Widget.AppCompat.Spinner.DropDown" />
-
             <EditText
                 android:id="@+id/searchQuery"
                 android:layout_width="wrap_content"
