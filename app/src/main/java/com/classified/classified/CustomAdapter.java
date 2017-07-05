@@ -1,62 +1,87 @@
 package com.classified.classified;
 
 import android.content.Context;
-import android.content.Intent;
+import android.support.annotation.NonNull;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.Filter;
+import android.widget.Filterable;
 import android.widget.TextView;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * Created by home_folder on 11/14/15.
  */
-public class CustomAdapter extends ArrayAdapter<String[]> {
-    Context context;
+public class CustomAdapter extends ArrayAdapter<ClassInfo> implements Filterable {
+    private Context context;
+    private List<ClassInfo> classInfoList;
+    private List<ClassInfo> filteredClassInfoList;
 
-    public CustomAdapter(Context context, ArrayList<String[]> list) {
+    public CustomAdapter(Context context, List<ClassInfo> list) {
         super(context, R.layout.custom_rowlayout, list);
+        classInfoList = list;
+        filteredClassInfoList = new ArrayList<>(classInfoList); //copying it over
         this.context = context;
     }
 
+    // view implementation
     public View getView(final int position, View convertView, ViewGroup parent) {
         LayoutInflater inflater = LayoutInflater.from(getContext());
         View customView = inflater.inflate(R.layout.custom_rowlayout, parent, false);
 
-        String[] array = getItem(position);
+        ClassInfo classInfo = filteredClassInfoList.get(position);
 
         TextView courseName = (TextView) customView.findViewById(R.id.courseText);
-        TextView date = (TextView) customView.findViewById(R.id.dateText);
-        TextView time = (TextView) customView.findViewById(R.id.timeText);
-        TextView courseId = (TextView) customView.findViewById(R.id.courseid);
+        TextView courseTitle = (TextView) customView.findViewById(R.id.courseTitle);
 
-        courseName.setText(array[0]);
-        courseId.setText(array[3]);
+        courseName.setText(classInfo.getCourseCode());
+        courseTitle.setText(classInfo.getCourseTitle());
 
-        String s;
 
-        if (array[4].contains("R"))
-            s = array[4].replace("R", "Th");
-        else
-            s = array[4];
-
-        date.setText(s);
-
-        if (array[5].equals("---"))
-            time.setText("TBA");
-        else {
-            String[] timeFrame = array[5].split(",");
-            int firstLength = timeFrame[0].length();
-            int secondLength = timeFrame[1].length();
-            String beginningTime = timeFrame[0].substring(0,firstLength-2) + ":"
-                    + timeFrame[0].substring(firstLength - 2,firstLength);
-            String endingTime = timeFrame[1].substring(0,secondLength-2) + ":"
-                    + timeFrame[1].substring(secondLength-2, secondLength);
-
-            time.setText(beginningTime +"-" + endingTime);
-        }
         return customView;
+    }
+
+    @Override
+    public int getCount() {
+        return filteredClassInfoList.size();
+    }
+
+    @NonNull
+    @Override
+    public android.widget.Filter getFilter() {
+        Filter filter = new Filter() {
+            @Override
+            protected FilterResults performFiltering(CharSequence charSequence) {
+                Log.d("performFiltering", charSequence.toString());
+                String filterQuery = charSequence.toString().toLowerCase();
+                FilterResults results = new FilterResults();
+                filteredClassInfoList.clear();
+
+                for (int i = 0; i < classInfoList.size(); i++) {
+                    ClassInfo cur = classInfoList.get(i);
+                    if (cur.checkIfQueryInCourseInfo(filterQuery)) {
+                        filteredClassInfoList.add(cur);
+                    }
+                }
+
+                // TODO: there is something wrong here..what if you return something of size 0?
+                results.count = filteredClassInfoList.size();
+                results.values = filteredClassInfoList;
+
+                return results;
+            }
+
+            @Override
+            protected void publishResults(CharSequence charSequence, FilterResults filterResults) {
+                notifyDataSetChanged();
+            }
+        };
+        return filter;
     }
 }

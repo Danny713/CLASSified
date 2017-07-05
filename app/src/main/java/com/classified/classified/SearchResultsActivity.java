@@ -5,6 +5,7 @@ import android.app.SearchManager;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.util.Log;
 
 /**
  * Created by munyongjang on 6/7/17.
@@ -13,6 +14,7 @@ import android.support.annotation.Nullable;
 public class SearchResultsActivity extends Activity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
+        Log.d("SearchResultsActivity", "hello?");
         super.onCreate(savedInstanceState);
         handleIntent(getIntent());
     }
@@ -26,6 +28,7 @@ public class SearchResultsActivity extends Activity {
         if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
             String query = intent.getStringExtra(SearchManager.QUERY);
             //use the query to search your data somehow
+            Log.d("SearchResultsActivity", "hi");
         }
     }
 }
