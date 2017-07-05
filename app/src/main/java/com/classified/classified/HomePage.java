@@ -13,10 +13,18 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.EditText;
 import android.widget.ListView;
-import android.widget.Spinner;
-import android.widget.TextView;
+
+import com.google.firebase.FirebaseException;
+import com.google.firebase.database.ChildEventListener;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.MutableData;
+import com.google.firebase.database.Transaction;
+import com.google.firebase.database.ValueEventListener;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -24,15 +32,18 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
-
+import java.util.Set;
 
 
 public class HomePage extends ActionBarActivity {
 
+    private String netid;
     private ListView openListView;
     private Context context;
     private CustomAdapter customAdapter;
+    private Set<String> bookmarks;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,25 +53,14 @@ public class HomePage extends ActionBarActivity {
         this.context = this;
         setTitle("CLASSified");
 
-        String courseJsonString = getJsonString();
+        netid = getIntent().getStringExtra("net_id");
+    }
 
-        // work to get the new listview
-        try {
-            JSONObject courseJsonObject = new JSONObject(courseJsonString);
-            JSONArray coursesArray = courseJsonObject.getJSONArray("courses"); // this contains all the courses
-            List<ClassInfo> infoList = new ArrayList<>();
-            for (int i = 0; i < coursesArray.length(); i++) {
-                JSONObject courseObject = coursesArray.getJSONObject(i);
-                infoList.add(new ClassInfo(courseObject));
-            }
-            openListView = (ListView) findViewById(R.id.openListView);
-            customAdapter = new CustomAdapter(this, infoList);
-            openListView.setAdapter(customAdapter);
-        } catch (JSONException e) {
-            Log.d("json", e.toString());
-        }
-        // TODO: this should be useful later on
-        openListView.setOnItemClickListener(onListClick);
+    @Override
+    protected void onResume() {
+        super.onResume();
+        bookmarks = new HashSet<>();
+        initBookmarks();
     }
 
     // TODO: this needs courseID, courseNAme
@@ -75,6 +75,7 @@ public class HomePage extends ActionBarActivity {
             */
             intent.putExtra("Course_ID", classInfo.getCourseId());
             intent.putExtra("Course_Name", classInfo.getCourseCode());
+            intent.putExtra("NET_ID", netid);
 
             //Intent intent = new Intent(context, ClassDetails.class);
             //TextView courseID = (TextView) view.findViewById(R.id.courseid);
@@ -85,6 +86,48 @@ public class HomePage extends ActionBarActivity {
 
         }
     };
+
+    private void initBookmarks() {
+        final DatabaseReference databaseRef = FirebaseDatabase.getInstance().getReference().child(netid);
+        databaseRef.runTransaction(new Transaction.Handler() {
+            @Override
+            public Transaction.Result doTransaction(MutableData mutableData) {
+                return Transaction.success(mutableData);
+            }
+            @Override
+            public void onComplete(DatabaseError databaseError, boolean b, DataSnapshot dataSnapshot) {
+                for (DataSnapshot ds : dataSnapshot.getChildren()) {
+                    bookmarks.add(ds.getValue(Bookmark.class).getCourseId());
+                }
+                initListView();
+            }
+        });
+    }
+
+    private void initListView() {
+        // work to get the new listview
+        try {
+            String courseJsonString = getJsonString();
+            JSONObject courseJsonObject = new JSONObject(courseJsonString);
+            JSONArray coursesArray = courseJsonObject.getJSONArray("courses"); // this contains all the courses
+            List<ClassInfo> infoList = new ArrayList<>();
+            for (int i = 0; i < coursesArray.length(); i++) {
+                JSONObject courseObject = coursesArray.getJSONObject(i);
+                ClassInfo classInfo = new ClassInfo(courseObject);
+                if (bookmarks.size() > 0 && !bookmarks.contains(classInfo.getCourseId())) {
+                    continue;
+                }
+                infoList.add(classInfo);
+            }
+            openListView = (ListView) findViewById(R.id.openListView);
+            customAdapter = new CustomAdapter(this, infoList);
+            openListView.setAdapter(customAdapter);
+        } catch (JSONException e) {
+            Log.d("json", e.toString());
+        }
+        // TODO: this should be useful later on
+        openListView.setOnItemClickListener(onListClick);
+    }
 
     @Override
     public void onBackPressed() {
@@ -138,7 +181,7 @@ public class HomePage extends ActionBarActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    public String getJsonString() {
+    private String getJsonString() {
         String json = null;
         try {
             Resources res = getResources();

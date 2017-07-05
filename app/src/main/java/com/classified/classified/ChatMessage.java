@@ -11,7 +11,6 @@ public class ChatMessage {
     private long messageTime;
 
     public ChatMessage(String messageText) {
-        Log.d("hello", "chatmessage received: " + messageText);
         this.messageText = messageText;
 
         // Initialize to current time
