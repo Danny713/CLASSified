@@ -43,7 +43,11 @@ public class HomePage extends ActionBarActivity {
     private ListView openListView;
     private Context context;
     private CustomAdapter customAdapter;
+    private List<ClassInfo> filteredClassInfoList;
+    private List<ClassInfo> bookmarkList;
+    private List<ClassInfo> fullInfoList;
     private Set<String> bookmarks;
+    private String searchQuery = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -102,23 +106,78 @@ public class HomePage extends ActionBarActivity {
             String courseJsonString = getJsonString();
             JSONObject courseJsonObject = new JSONObject(courseJsonString);
             JSONArray coursesArray = courseJsonObject.getJSONArray("courses"); // this contains all the courses
-            List<ClassInfo> infoList = new ArrayList<>();
+            fullInfoList = new ArrayList<>();
+            bookmarkList = new ArrayList<>();
             for (int i = 0; i < coursesArray.length(); i++) {
                 JSONObject courseObject = coursesArray.getJSONObject(i);
                 ClassInfo classInfo = new ClassInfo(courseObject);
+                fullInfoList.add(classInfo);
                 if (bookmarks.size() > 0 && !bookmarks.contains(classInfo.getCourseId())) {
                     continue;
                 }
-                infoList.add(classInfo);
+                bookmarkList.add(classInfo);
             }
             openListView = (ListView) findViewById(R.id.openListView);
-            customAdapter = new CustomAdapter(this, infoList);
+            refreshList();
+            if (customAdapter == null) {
+                customAdapter = new CustomAdapter(this, filteredClassInfoList);
+            }
+            if (searchQuery.length() > 0) {
+                filter(searchQuery);
+            }
             openListView.setAdapter(customAdapter);
         } catch (JSONException e) {
             Log.d("json", e.toString());
         }
         // TODO: this should be useful later on
         openListView.setOnItemClickListener(onListClick);
+    }
+
+    private void refreshList() {
+        runOnUiThread(new Runnable()
+        {
+            @Override
+            public void run()
+            {
+                if (filteredClassInfoList == null) {
+                    filteredClassInfoList = new ArrayList<>(bookmarkList);
+                } else {
+                    filteredClassInfoList.clear();
+                    filteredClassInfoList.addAll(bookmarkList);
+                }
+                if (customAdapter != null) {
+                    Log.d("hello", "notifyingDataChange");
+                    customAdapter.notifyDataSetChanged();
+                }
+            }
+        });
+    }
+
+    private void filter(final String query) {
+        runOnUiThread(new Runnable()
+        {
+            @Override
+            public void run()
+            {
+                String filterQuery = query.replaceAll("\\s+","").toLowerCase();
+                if (filterQuery.length() == 0) {
+                    filteredClassInfoList.clear();
+                    filteredClassInfoList.addAll(bookmarkList);
+                } else {
+                    filteredClassInfoList.clear();
+                    for (int i = 0; i < fullInfoList.size(); i++) {
+                        ClassInfo cur = fullInfoList.get(i);
+                        if (cur.checkIfQueryInCourseInfo(filterQuery)) {
+                            filteredClassInfoList.add(cur);
+                        }
+                    }
+                }
+                if (customAdapter != null) {
+                    Log.d("hello", "notifyingDataChange");
+                    customAdapter.notifyDataSetChanged();
+                }
+            }
+        });
     }
 
     @Override
@@ -142,17 +201,19 @@ public class HomePage extends ActionBarActivity {
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
-                Log.d("SearchResultsActivity", "hello?");
-                customAdapter.getFilter().filter(query.replaceAll("\\s+","").toLowerCase());
-                customAdapter.notifyDataSetChanged();
-                return false;
+                searchQuery = query.replaceAll("\\s+","").toLowerCase();
+                filter(query);
+                //customAdapter.notifyDataSetChanged();
+                return true;
             }
 
             @Override
             public boolean onQueryTextChange(String newText) {
-                customAdapter.getFilter().filter(newText.replaceAll("\\s+","").toLowerCase());
-                customAdapter.notifyDataSetChanged();
-                return false;
+                Log.d("hello", "onQueryTextChange: " + newText);
+                searchQuery = newText.replaceAll("\\s+","").toLowerCase();
+                filter(newText);
+                //customAdapter.notifyDataSetChanged();
+                return true;
             }
         });
 

@@ -20,15 +20,12 @@ import java.util.List;
  */
 public class CustomAdapter extends ArrayAdapter<ClassInfo> implements Filterable {
     private Context context;
-    private List<ClassInfo> classInfoList;
     private List<ClassInfo> filteredClassInfoList;
 
-    public CustomAdapter(Context context, List<ClassInfo> list) {
-        super(context, R.layout.custom_rowlayout, list);
-        Log.d("customAdapterCons", "is this getting called again?");
-        classInfoList = list;
-        //copying it over
-        filteredClassInfoList = new ArrayList<>(classInfoList);
+    public CustomAdapter(Context context, List<ClassInfo> filteredClassInfoList) {
+        super(context, R.layout.custom_rowlayout, filteredClassInfoList); //bookmarkList = fullList if no bookmarks exist
+        this.filteredClassInfoList = filteredClassInfoList;
+
         this.context = context;
     }
 
@@ -45,7 +42,6 @@ public class CustomAdapter extends ArrayAdapter<ClassInfo> implements Filterable
         courseName.setText(classInfo.getCourseCode());
         courseTitle.setText(classInfo.getCourseTitle());
 
-
         return customView;
     }
 
@@ -60,17 +56,8 @@ public class CustomAdapter extends ArrayAdapter<ClassInfo> implements Filterable
         Filter filter = new Filter() {
             @Override
             protected FilterResults performFiltering(CharSequence charSequence) {
-                Log.d("performFiltering", charSequence.toString());
-                String filterQuery = charSequence.toString().toLowerCase();
+                //String filterQuery = charSequence.toString().toLowerCase();
                 FilterResults results = new FilterResults();
-                filteredClassInfoList.clear();
-
-                for (int i = 0; i < classInfoList.size(); i++) {
-                    ClassInfo cur = classInfoList.get(i);
-                    if (cur.checkIfQueryInCourseInfo(filterQuery)) {
-                        filteredClassInfoList.add(cur);
-                    }
-                }
 
                 // TODO: there is something wrong here..what if you return something of size 0?
                 results.count = filteredClassInfoList.size();
@@ -80,7 +67,7 @@ public class CustomAdapter extends ArrayAdapter<ClassInfo> implements Filterable
 
             @Override
             protected void publishResults(CharSequence charSequence, FilterResults filterResults) {
-                notifyDataSetChanged();
+                //notifyDataSetChanged();
             }
         };
         return filter;
