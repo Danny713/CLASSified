@@ -25,8 +25,10 @@ public class CustomAdapter extends ArrayAdapter<ClassInfo> implements Filterable
 
     public CustomAdapter(Context context, List<ClassInfo> list) {
         super(context, R.layout.custom_rowlayout, list);
+        Log.d("customAdapterCons", "is this getting called again?");
         classInfoList = list;
-        filteredClassInfoList = new ArrayList<>(classInfoList); //copying it over
+        //copying it over
+        filteredClassInfoList = new ArrayList<>(classInfoList);
         this.context = context;
     }
 
@@ -73,7 +75,6 @@ public class CustomAdapter extends ArrayAdapter<ClassInfo> implements Filterable
                 // TODO: there is something wrong here..what if you return something of size 0?
                 results.count = filteredClassInfoList.size();
                 results.values = filteredClassInfoList;
-
                 return results;
             }
 
@@ -83,5 +84,10 @@ public class CustomAdapter extends ArrayAdapter<ClassInfo> implements Filterable
             }
         };
         return filter;
+    }
+
+    @Override
+    public ClassInfo getItem(int position) {
+        return filteredClassInfoList.get(position);
     }
 }

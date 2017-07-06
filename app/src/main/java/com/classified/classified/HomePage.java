@@ -69,18 +69,10 @@ public class HomePage extends ActionBarActivity {
 
             Intent intent = new Intent(context, chat.class);
             ClassInfo classInfo = (ClassInfo) parent.getItemAtPosition(position);
-            /*
-            TextView courseID = (TextView) view.findViewById(R.id.courseid);
-            TextView courseName = (TextView) view.findViewById(R.id.courseText);
-            */
+
             intent.putExtra("Course_ID", classInfo.getCourseId());
             intent.putExtra("Course_Name", classInfo.getCourseCode());
             intent.putExtra("NET_ID", netid);
-
-            //Intent intent = new Intent(context, ClassDetails.class);
-            //TextView courseID = (TextView) view.findViewById(R.id.courseid);
-            //TextView courseName = (TextView) view.findViewById(R.id.courseText);
-            //intent.putExtra("Course_ID", courseID.getText().toString());
 
             startActivity(intent);
 
@@ -152,12 +144,14 @@ public class HomePage extends ActionBarActivity {
             public boolean onQueryTextSubmit(String query) {
                 Log.d("SearchResultsActivity", "hello?");
                 customAdapter.getFilter().filter(query.replaceAll("\\s+","").toLowerCase());
+                customAdapter.notifyDataSetChanged();
                 return false;
             }
 
             @Override
             public boolean onQueryTextChange(String newText) {
                 customAdapter.getFilter().filter(newText.replaceAll("\\s+","").toLowerCase());
+                customAdapter.notifyDataSetChanged();
                 return false;
             }
         });
