@@ -146,8 +146,6 @@ public class chat extends ActionBarActivity {
                 isBookmarked = true;
                 setBookmarkOptions();
                 break;
-            case R.id.about:
-                break;
         }
         return true;
     }

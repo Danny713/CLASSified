@@ -7,7 +7,4 @@
     <item
         android:id="@+id/unbookmark"
         android:title="Unbookmark"/>
-    <item
-        android:id="@+id/about"
-        android:title="About"/>
 </menu>

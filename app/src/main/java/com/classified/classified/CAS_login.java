@@ -5,7 +5,9 @@ import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Display;
 import android.webkit.JavascriptInterface;
+import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
@@ -38,10 +40,12 @@ public class CAS_login extends AppCompatActivity {
         setContentView(R.layout.activity_cas_login);
 
         final Context context = this;
-
-
+        final String url = "https://www.cs.princeton.edu/~cjhsu/fristrations/CASlogin.php";
         final WebView webView = (WebView)findViewById(R.id.webView);
-        webView.loadUrl("https://www.cs.princeton.edu/~cjhsu/fristrations/CASlogin.php");
+
+        webView.getSettings().setLoadWithOverviewMode(true);
+        webView.getSettings().setUseWideViewPort(true);
+        webView.loadUrl(url);
         webView.getSettings().setJavaScriptEnabled(true);
         webView.addJavascriptInterface(new MyJavaScriptInterface(this), "HtmlViewer");
         webView.setWebViewClient(new WebViewClient() {
